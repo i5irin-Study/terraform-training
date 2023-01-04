@@ -1,31 +1,3 @@
-variable "aws_access_key" {
-  type = string
-}
-
-variable "aws_secret_key" {
-  type = string
-}
-
-variable "region" {
-  type = string
-}
-
-variable "availability_zone" {
-  type = string
-}
-
-variable "assume_role" {
-  type = string
-}
-
-variable "instance_type" {
-  type = string
-}
-
-variable "vpc_cidr" {
-  type = string
-}
-
 terraform {
   required_version = "~> 1.3.0"
   required_providers {
