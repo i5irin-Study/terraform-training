@@ -131,4 +131,8 @@ terraform.rc
 # Backend configs
 *.tfbackend
 
+# key
+*.rsa
+*.rsa.pub
+
 
