@@ -128,4 +128,7 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Backend configs
+*.tfbackend
+
 

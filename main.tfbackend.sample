@@ -1,0 +1,4 @@
+bucket = "S3 bucket to place Terraform State"
+key = "Path to Terraform State"
+region = "S3 Region"
+role_arn = "ARN of IAM Role for creating Terraform State"
