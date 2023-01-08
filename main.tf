@@ -94,15 +94,15 @@ resource "aws_key_pair" "ssh_key" {
 }
 
 resource "aws_instance" "web_server" {
-  ami                    = "ami-0bba69335379e17f8"
+  ami                    = "ami-0e2bf1ada70fd3f33"
   instance_type          = "${var.instance_type}"
   subnet_id              = aws_subnet.web_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
   key_name = "${aws_key_pair.ssh_key.key_name}"
   user_data              = <<EOF
 #! /bin/bash
-sudo yum install -y httpd
-sudo systemctl start httpd
-sudo systemctl enable httpd
+sudo apt install -y apache2
+sudo systemctl start apache2
+sudo systemctl enable apache2
 EOF
 }
