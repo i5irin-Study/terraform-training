@@ -20,6 +20,48 @@ data "http" "ifconfig" {
 locals {
   current-ip = chomp(data.http.ifconfig.body)
   allowed-cidr  = "${local.current-ip}/32"
+  cloud-config = <<END
+#cloud-config
+${jsonencode({
+  write_files = [
+    {
+      path        = "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+      permissions = "0644"
+      owner       = "root:root"
+      encoding    = "b64"
+      content     = filebase64("${path.module}/amazon-cloudwatch-agent.json")
+    },
+  ]
+})}
+END
+}
+
+data "cloudinit_config" "init" {
+  gzip          = false
+  base64_encode = false
+
+  part {
+    content_type = "text/cloud-config"
+    filename     = "cloud-config.yaml"
+    content      = local.cloud-config
+  }
+
+  part {
+    content_type = "text/x-shellscript"
+    filename     = "init.sh"
+    content  = <<EOF
+#!/bin/bash
+apt install -y apache2
+systemctl start apache2
+systemctl enable apache2
+    EOF
+  }
+
+  part {
+    content_type = "text/x-shellscript"
+    filename     = "setup_amazon_cloudwatch_agent.sh"
+    content  = file("${path.module}/setup_amazon_cloudwatch_agent.sh")
+  }
 }
 
 provider "aws" {
@@ -99,10 +141,5 @@ resource "aws_instance" "web_server" {
   subnet_id              = aws_subnet.web_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
   key_name = "${aws_key_pair.ssh_key.key_name}"
-  user_data              = <<EOF
-#! /bin/bash
-sudo apt install -y apache2
-sudo systemctl start apache2
-sudo systemctl enable apache2
-EOF
+  user_data = data.cloudinit_config.init.rendered
 }
