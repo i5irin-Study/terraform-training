@@ -135,11 +135,41 @@ resource "aws_key_pair" "ssh_key" {
   public_key = file("./terraform-training.rsa.pub")
 }
 
+resource "aws_iam_role" "logger_role" {
+  name = "logger"
+  path = "/"
+  assume_role_policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : "sts:AssumeRole",
+          "Principal" : {
+            "Service" : "ec2.amazonaws.com"
+          },
+          "Effect" : "Allow"
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "cw-policy_attach" {
+  role = aws_iam_role.logger_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+}
+
+resource "aws_iam_instance_profile" "web_server_profile" {
+  name = "web_server_profile"
+  role = aws_iam_role.logger_role.name
+}
+
 resource "aws_instance" "web_server" {
   ami                    = "ami-0e2bf1ada70fd3f33"
   instance_type          = "${var.instance_type}"
   subnet_id              = aws_subnet.web_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
+  iam_instance_profile = aws_iam_instance_profile.web_server_profile.name
   key_name = "${aws_key_pair.ssh_key.key_name}"
   user_data = data.cloudinit_config.init.rendered
 }
