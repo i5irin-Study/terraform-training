@@ -40,6 +40,8 @@ data "cloudinit_config" "init" {
   gzip          = false
   base64_encode = false
 
+  # The CloudWatch Agent configuration file is passed to the EC2 instance via cloud-init.(cf. https://stackoverflow.com/a/62105461)
+  # There is also a way to use the SSM parameter store to pass settings.（cf. https://jazz-twk.medium.com/cloudwatch-agent-on-ec2-with-terraform-8cf58e8736de）
   part {
     content_type = "text/cloud-config"
     filename     = "cloud-config.yaml"
@@ -57,6 +59,8 @@ systemctl enable apache2
     EOF
   }
 
+  # NOTE: terraform appy completes before the cloud-init process completes.
+  # It can also wait for cloud-init to complete.(cf. https://zenn.dev/thr/articles/6ddf5d90b82657)
   part {
     content_type = "text/x-shellscript"
     filename     = "setup_amazon_cloudwatch_agent.sh"
