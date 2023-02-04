@@ -1,0 +1,6 @@
+---
+- name: Configure Webserver
+  hosts: webservers
+  gather_facts: false
+  roles:
+    - apache
