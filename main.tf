@@ -48,17 +48,6 @@ data "cloudinit_config" "init" {
     content      = local.cloud-config
   }
 
-  part {
-    content_type = "text/x-shellscript"
-    filename     = "init.sh"
-    content  = <<EOF
-#!/bin/bash
-apt install -y apache2
-systemctl start apache2
-systemctl enable apache2
-    EOF
-  }
-
   # NOTE: terraform appy completes before the cloud-init process completes.
   # It can also wait for cloud-init to complete.(cf. https://zenn.dev/thr/articles/6ddf5d90b82657)
   part {
